@@ -1,7 +1,8 @@
 // получаем данные
-import data from "./data";
-import PeopleInfo from "./PeopleInfo";
+import { data1, data2 } from './data';
+import PeopleInfo from './PeopleInfo';
 
-let table = new PeopleInfo(data, "people-info");
-table.init();
-console.log(table);
+let table1 = new PeopleInfo(data1, 'people-info');
+let table2 = new PeopleInfo(data2, 'newID');
+table1.init();
+table2.init();
