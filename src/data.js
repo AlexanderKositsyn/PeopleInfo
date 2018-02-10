@@ -1,4 +1,4 @@
-var data1 = [
+const data1 = [
   {
     Name: 'Ivan Ivanov',
     Position: 'Developer',
@@ -225,7 +225,7 @@ var data1 = [
   },
 ];
 
-var data2 = [
+const data2 = [
   {
     Name: 'Ivan Ivanov',
     Position: 'Developer',

@@ -1,8 +1,19 @@
-import { htmlHeader, htmlTable, htmlPagination } from './htmlTemplates';
-import getStyleTable from './cssTemplate';
+import { htmlHeader, htmlTable, htmlPagination } from "./htmlTemplates";
+import getStyleTable from "./cssTemplate";
 
-// этот конструктор принимает данные которые необходимо занести в таблицу
-// и корневой элемент в который будет рендерится вся таблица
+// Компонент "Таблица Людей"
+// При создании экземпляра компонента необходимо передать ему корневой элемент в который рендерить таблицу и
+// данные, которые необходимо отрендерить в таблице
+// Основная идея:
+// 1) У всего компонента есть состояние, которое хранится в экземпляре
+// 2) В это состояние входит : значение инпута поиска(search), какой сортировщик выбран в таблице(в заголовке каждого столбца)
+// 3) Выше указынные пункты генерируют фильтрованные данные(новый массив), которые потом рендарятся по 10 штук.
+// 4) Кнопки пагинации рендерятся в зависимости от количества элементов в уже фильтрованном массиве
+// 5) Плюс дополнительные фукнции, которые ,генерируют html, красят в зависимости от состояния элементы, сортируют и фильтруют
+// исходный массив
+
+// этот конструктор принимает Данные которые необходимо занести в таблицу
+// и Корневой элемент в который будет рендерится вся таблица
 export default class PeopleInfo {
   constructor(data, elementId) {
     this.data = data;
@@ -12,9 +23,9 @@ export default class PeopleInfo {
   // текущий номер пагинации
   currentPagination = 1;
   // текст в инпуте
-  currentInputText = '';
+  currentInputText = "";
   // включенный сортировщик
-  currentSortValue = '';
+  currentSortValue = "";
   isForwardSortValue = undefined;
   //шаблоны html
   htmlHeader = htmlHeader;
@@ -23,7 +34,7 @@ export default class PeopleInfo {
   //функция для генерция HTML кода для строк таблицы
   // принимает объект и генерирует и его св-в строку таблицы
   tableRowHTMLGenerator(obj) {
-    let innerRow = '';
+    let innerRow = "";
     // фунция генерации ячеек
     function tableCellHTMLGenerator(name, key) {
       return `<td class="people-info__table-cell" data-sort='${key}' >${name}</td>`;
@@ -38,30 +49,31 @@ export default class PeopleInfo {
 
   paginationButtonHTMLGenerator(lenght) {
     lenght === 0 ? (lenght = 1) : void 0;
-    let sumString = '';
+    let sumString = "";
     for (let i = 1; i <= lenght; i++) {
       sumString += `<li class="people-info__pagination-item ${
-        i === 1 ? 'active' : ''
+        i === 1 ? "active" : ""
       } ">
         <button class="people-info__pagination-button">${i}</button>
       </li>`;
     }
     return sumString;
   }
+  // функция принимает:
   // фрагмент куда будет сохранен элемент,
   // переменная в которой строка html
   // тег, какой элемент в корне string
   createElementFromString(fragment, string, tag) {
     let elem;
     switch (tag) {
-      case 'TD':
-        elem = document.createElement('TR');
+      case "TD":
+        elem = document.createElement("TR");
         break;
-      case 'TR':
-        elem = document.createElement('TBODY');
+      case "TR":
+        elem = document.createElement("TBODY");
         break;
       default:
-        elem = document.createElement('DIV');
+        elem = document.createElement("DIV");
     }
     elem.innerHTML = string;
     fragment.appendChild(elem.firstElementChild);
@@ -89,13 +101,13 @@ export default class PeopleInfo {
     for (let i = 0; i < Object.keys(this.data[0]).length; i++) {
       //запишем в фрагмент (именно в таблицу) заголовки
       this.createElementFromString(
-        this.fragmentApp.querySelector('tr'),
+        this.fragmentApp.querySelector("tr"),
         tableHeaderHTMLGenerator(Object.keys(this.data[0])[i]),
-        'TD',
+        "TD"
       );
     }
 
-    // порядок вызова функций важен
+    // (порядок вызова функций важен)
     //вставим фрагмент в таблицу
     this.rootElement.appendChild(this.fragmentApp);
     // ставим все обработчики
@@ -106,26 +118,21 @@ export default class PeopleInfo {
     // формируем стили относительно корневого элемента
     let styleTable = getStyleTable(`#${this.rootElement.id}`);
     // подлючаем стили
-    var styleTag = document.createElement('STYLE');
+    var styleTag = document.createElement("STYLE");
     var text = document.createTextNode(styleTable);
     styleTag.appendChild(text);
     document.head.appendChild(styleTag);
   }
 
-  //берет данные из объекта и принимает фильтр(которые сортирует, либо скрывает элементы)
-  // по умолчанию фильтр для всех элементов выводит true(т е все проходят)
+  //берет данные которые сортирует, либо скрывает элементы
   renderItems() {
-    console.log('произошел ререндер');
-    console.log('текущее состояние приложения');
-    console.log(this);
-
     // создадим фрагмент в который будем вставлять элементы
     let fragmentTable = new DocumentFragment();
 
     // формируем новый массив в зависимости от  инпута search
     let filteredData = this.data.filter(item => {
       //найдем совпадния в объекте
-      let strOfValues = '';
+      let strOfValues = "";
       for (let key in item) {
         strOfValues += item[key];
       }
@@ -140,13 +147,13 @@ export default class PeopleInfo {
         let value1 = a[this.currentSortValue],
           value2 = b[this.currentSortValue];
         // если это валюта , то сравниваем другие строки
-        if (typeof value1 === 'string')
-          if (value1.indexOf('$') >= 0 && value2.indexOf('$') >= 0) {
+        if (typeof value1 === "string")
+          if (value1.indexOf("$") >= 0 && value2.indexOf("$") >= 0) {
             value1 = parseFloat(value1.slice(1));
             value2 = parseFloat(value2.slice(1));
           }
         // если это дата , то сравниваем числа с начала Unix
-        if (typeof value1 === 'string')
+        if (typeof value1 === "string")
           if (/\d+\//g.test(value1) && /\d+\//g.test(value2)) {
             value1 = new Date(value1).getTime();
             value2 = new Date(value2).getTime();
@@ -179,92 +186,95 @@ export default class PeopleInfo {
         this.createElementFromString(
           fragmentTable,
           this.tableRowHTMLGenerator(array[index]),
-          'TR',
+          "TR"
         );
     });
 
     // отчищаем таблицу от старых данных
-    //сохраняя при этом заголовок
+    //сохраняя при этом заголовочную строку таблицы
     let removedCollection = this.rootElement.querySelectorAll(
-      'tr:not(:first-child)',
+      "tr:not(:first-child)"
     );
     for (let i = removedCollection.length; i--; ) {
       removedCollection[i].remove();
     }
 
     //вставляем фрагмент в таблицу
-    this.rootElement.querySelector('tbody').appendChild(fragmentTable);
+    this.rootElement.querySelector("tbody").appendChild(fragmentTable);
 
     // в зависимости от кол-ва элементов генерируем необходимые пагинационные кнопки
     // если 0 то ставим хотя бы одну пагинацию
     this.amoutPagination = parseInt(filteredData.length / 10);
     !this.amoutPagination ? (this.amoutPagination = 1) : void 0;
-    //вставляем фрагмент в пагинацию
+    //вставляем сгенерированные элементы в пагинацию
     this.rootElement.querySelector(
-      '.people-info__pagination-list',
+      ".people-info__pagination-list"
     ).innerHTML = this.paginationButtonHTMLGenerator(this.amoutPagination);
-    // ставим active в зависимоти от текущей пагинации
+    // ставим active  для кнопки пагинации в зависимоти от текущей пагинации
     let paginationButtons = this.paginationListButtons.children;
     for (let i = 0; i < paginationButtons.length; ++i) {
-      paginationButtons[i].classList.remove('active');
+      paginationButtons[i].classList.remove("active");
     }
     this.paginationListButtons.children[
       this.currentPagination - 1
-    ].classList.add('active');
+    ].classList.add("active");
 
     // раскрасим таблицу в зависимости от выбанной сортировки
     let column = this.rootElement.querySelectorAll(
-      `[data-sort='${this.currentSortValue}']`,
+      `[data-sort='${this.currentSortValue}']`
     );
     for (let i = 1; i < column.length; ++i) {
       i % 2
-        ? (column[i].style.backgroundColor = '#F0E0E0')
-        : (column[i].style.backgroundColor = '#F0F0F0');
+        ? (column[i].style.backgroundColor = "#F0E0E0")
+        : (column[i].style.backgroundColor = "#F0F0F0");
     }
-    // заменим на активный класс кнопку сортировку
+    // заменим на активный класс кнопку сортировки(это в заголвке таблицы)
     let headerRow = this.rootElement.querySelectorAll(
-      '.people-info__previous-next',
+      ".people-info__previous-next"
     );
     if (this.isForwardSortValue === true) {
       for (let i = 0; i < headerRow.length; ++i) {
-        headerRow[i].classList.remove('forward');
-        headerRow[i].classList.remove('reverse');
+        headerRow[i].classList.remove("forward");
+        headerRow[i].classList.remove("reverse");
       }
-      if (column.length) column[0].classList.add('forward');
+      if (column.length) column[0].classList.add("forward");
     } else {
       for (let i = 0; i < headerRow.length; ++i) {
-        headerRow[i].classList.remove('forward');
-        headerRow[i].classList.remove('reverse');
+        headerRow[i].classList.remove("forward");
+        headerRow[i].classList.remove("reverse");
       }
-      if (column.length) column[0].classList.add('reverse');
+      if (column.length) column[0].classList.add("reverse");
     }
   }
 
-  // метод объявления обработчиков на приложении
+  // Метод объявления обработчиков на приложении.
+  // Обработчики изменяют состояние приложения.
+  // И вызывают ререндер приложения.
   initEventListeners() {
+    // найдем необходымые элементы относительно корня
     this.paginationListButtons = this.rootElement.querySelector(
-      '.people-info__pagination-list',
+      ".people-info__pagination-list"
     );
     let paginationListPrevious = this.rootElement.querySelector(
-      '.people-info__previous',
+      ".people-info__previous"
     );
     let paginationListNext = this.rootElement.querySelector(
-      '.people-info__next',
+      ".people-info__next"
     );
     let inputSearch = this.rootElement.querySelector(
-      '.people-info__search-input',
+      ".people-info__search-input"
     );
-    let tableHeader = this.rootElement.querySelector('TBODY').firstElementChild;
-    //обработчик на кнопку пагинации
-    this.paginationListButtons.addEventListener('click', e => {
-      if (e.target.tagName === 'BUTTON') {
+    let tableHeader = this.rootElement.querySelector("TBODY").firstElementChild;
+    //обработчик на кнопки пагинации
+    this.paginationListButtons.addEventListener("click", e => {
+      if (e.target.tagName === "BUTTON") {
         this.currentPagination = parseInt(e.target.textContent);
       }
       this.renderItems();
     });
-    // обработчик на кпопку next
-    paginationListNext.addEventListener('click', e => {
-      if (e.target.tagName === 'BUTTON') {
+    // обработчик на кпопку next в пагинации
+    paginationListNext.addEventListener("click", e => {
+      if (e.target.tagName === "BUTTON") {
         this.currentPagination !== this.amoutPagination
           ? (this.currentPagination += 1)
           : void 0;
@@ -272,24 +282,23 @@ export default class PeopleInfo {
 
       this.renderItems();
     });
-    // обработчик на кпопку previous
-    paginationListPrevious.addEventListener('click', e => {
-      if (e.target.tagName === 'BUTTON') {
+    // обработчик на кпопку previous в пагинации
+    paginationListPrevious.addEventListener("click", e => {
+      if (e.target.tagName === "BUTTON") {
         this.currentPagination !== 1 ? (this.currentPagination -= 1) : void 0;
       }
       this.renderItems();
     });
     // обработчик для инпута search
-    // тут будет фильтр по введенному слову в input
-    inputSearch.addEventListener('input', e => {
+    inputSearch.addEventListener("input", e => {
       // изменяем состояние приложения
       this.currentInputText = e.target.value;
       this.currentPagination = 1;
       //вызываем ререндер
       this.renderItems();
     });
-    tableHeader.addEventListener('click', e => {
-      if (e.target.tagName === 'DIV') {
+    tableHeader.addEventListener("click", e => {
+      if (e.target.tagName === "DIV") {
         // сравниваем новое значение и старое значение
         if (
           this.currentSortValue === e.target.dataset.sort ||
