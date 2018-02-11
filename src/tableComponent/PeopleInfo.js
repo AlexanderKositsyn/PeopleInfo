@@ -1,4 +1,8 @@
-import { htmlHeader, htmlTable, htmlPagination } from './htmlTemplates';
+import {
+  htmlHeader,
+  htmlTable,
+  htmlPagination
+} from './htmlTemplates';
 import getStyleTable from './cssTemplate';
 
 // Компонент "Таблица Людей"
@@ -11,6 +15,8 @@ import getStyleTable from './cssTemplate';
 // 4) Кнопки пагинации рендерятся в зависимости от количества элементов в уже фильтрованном массиве
 // 5) Плюс дополнительные фукнции, которые ,генерируют html, красят в зависимости от состояния элементы, сортируют и фильтруют
 // исходный массив
+// Минус что в конструктор передаем объект(массив) (а значит ссылку на объект), а значит если мы где то во внешнем коде изменим Данные, то this.data тоже изменится 
+// решить эту проблему можно сделать копию объекта(какой поведение должно быть я не знаю) 
 
 // этот конструктор принимает Данные которые необходимо занести в таблицу
 // и Корневой элемент в который будет рендерится вся таблица
@@ -195,7 +201,7 @@ export default class PeopleInfo {
     let removedCollection = this.rootElement.querySelectorAll(
       'tr:not(:first-child)',
     );
-    for (let i = removedCollection.length; i--; ) {
+    for (let i = removedCollection.length; i--;) {
       removedCollection[i].remove();
     }
 
@@ -224,9 +230,9 @@ export default class PeopleInfo {
       `[data-sort='${this.currentSortValue}']`,
     );
     for (let i = 1; i < column.length; ++i) {
-      i % 2
-        ? (column[i].style.backgroundColor = '#F0E0E0')
-        : (column[i].style.backgroundColor = '#F0F0F0');
+      i % 2 ?
+        (column[i].style.backgroundColor = '#F0E0E0') :
+        (column[i].style.backgroundColor = '#F0F0F0');
     }
     // заменим на активный класс кнопку сортировки(это в заголвке таблицы)
     let headerRow = this.rootElement.querySelectorAll(
@@ -275,9 +281,9 @@ export default class PeopleInfo {
     // обработчик на кпопку next в пагинации
     paginationListNext.addEventListener('click', e => {
       if (e.target.tagName === 'BUTTON') {
-        this.currentPagination !== this.amoutPagination
-          ? (this.currentPagination += 1)
-          : void 0;
+        this.currentPagination !== this.amoutPagination ?
+          (this.currentPagination += 1) :
+          void 0;
       }
 
       this.renderItems();
