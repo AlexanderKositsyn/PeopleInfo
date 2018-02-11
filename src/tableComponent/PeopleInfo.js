@@ -118,8 +118,8 @@ export default class PeopleInfo {
     // формируем стили относительно корневого элемента
     let styleTable = getStyleTable(`#${this.rootElement.id}`);
     // подлючаем стили
-    var styleTag = document.createElement('STYLE');
-    var text = document.createTextNode(styleTable);
+    let styleTag = document.createElement('STYLE');
+    let text = document.createTextNode(styleTable);
     styleTag.appendChild(text);
     document.head.appendChild(styleTag);
   }
